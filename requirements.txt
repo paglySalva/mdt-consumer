@@ -1,0 +1,6 @@
+amqp==5.0.6
+importlib-metadata==3.10.0
+kombu==5.0.2
+typing-extensions==3.7.4.3
+vine==5.0.0
+zipp==3.4.1
