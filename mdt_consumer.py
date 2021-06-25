@@ -23,12 +23,21 @@ from kombu.mixins import ConsumerMixin
 
 APP_NAME = "mdt-consumer"
 
+here = os.path.dirname(os.path.abspath(__file__))
+
+# Creating app folder
 if not os.path.exists(f"/etc/opt/{APP_NAME}/"):
     os.mkdir(f'/etc/opt/{APP_NAME}/')
-    here = os.path.dirname(os.path.abspath(__file__))
+
+# Copy default logging configuration file
+if not os.path.isfile(f"/etc/opt/{APP_NAME}/logconfig.ini"):
     shutil.copy(here + "/config/logconfig.ini", f'/etc/opt/{APP_NAME}/')
+
+# Copy default configuration file
+if not os.path.isfile(f"/etc/opt/{APP_NAME}/config.ini"):
     shutil.copy(here + "/config/config.ini", f'/etc/opt/{APP_NAME}/')
 
+# Creating logs folder
 if not os.path.exists(f"/var/log/{APP_NAME}/"):
     os.mkdir(f'/var/log/{APP_NAME}/')
 
@@ -51,13 +60,14 @@ for exchange_name in json.loads(config["RABBITMQ"]["exchanges"]):
     consume_queues.append(
         Queue(
             f"mdt_consumer_{exchange_name}",
-            Exchange(exchange_name, 
-                     type="topic", 
+            Exchange(exchange_name,
+                     type="topic",
                      durable=False),
             routing_key=f"{exchange_name}.mdt_consumer.#",
             durable=False,
             exclusive=False)
     )
+
 
 class Worker(ConsumerMixin):
     def __init__(self, connection, queues):
@@ -76,7 +86,7 @@ class Worker(ConsumerMixin):
             print_body = config.getboolean("VERBOSE", "print_body_messages")
             body_message = json.loads(body) if print_body else ""
             logger.info(f"Received:\n {routing_key}\n {exchange_name}\n{body_message}")
-        except:
+        except BaseException:
             # Do nothing
             logger.info(
                 'a non-valid message has been received, \
@@ -123,6 +133,7 @@ def main():
     if arguments.start:
         logger.info('The mdt-consumer is going to start')
         start()
+
 
 if __name__ == "__main__":
     logger.info('The mdt-consumer is in main')
