@@ -81,11 +81,14 @@ class Worker(ConsumerMixin):
     def on_message(self, body, message):
         # from exchange: actions queue: player_actions
         try:
+            # exchange_name = message.delivery_info['exchange']
             routing_key = message.delivery_info['routing_key']
-            exchange_name = message.delivery_info['exchange']
-            print_body = config.getboolean("VERBOSE", "print_body_messages")
-            body_message = json.loads(body) if print_body else ""
-            logger.info(f"Received:\n {routing_key}\n {exchange_name}\n{body_message}")
+            logger.info(f"Received message from: {routing_key}")
+            
+            # Log body messages depending on the configuration verbosity
+            if config.getboolean("VERBOSE", "print_body_messages"):
+                logger.info(json.loads(body))
+
         except BaseException:
             # Do nothing
             logger.info(
