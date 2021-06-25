@@ -63,7 +63,7 @@ for exchange_name in json.loads(config["RABBITMQ"]["exchanges"]):
             Exchange(exchange_name,
                      type="topic",
                      durable=False),
-            routing_key=f"{exchange_name}.mdt_consumer.#",
+            routing_key=f"{exchange_name}.#",
             durable=False,
             exclusive=False)
     )
